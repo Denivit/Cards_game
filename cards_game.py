@@ -181,5 +181,4 @@ player_2_hands = player_2.hands
 one_step = leader.one_step(player_1_hands, player_2_hands, trump_card)
 print(f'Первый ходит: {one_step}')
 played_cards = deck.table
-#player_1.step(1, played_cards, player_1_hands)
-l = player_1.add_cards()
+# player_1.step(1, played_cards, player_1_hands)
