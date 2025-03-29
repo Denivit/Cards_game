@@ -10,7 +10,8 @@ MIN_COUNT_CARD = 6
 
 class Card():
     """Класс карты."""
-    def __init__(self, suit: str, rank: str, value: int, image_path: str):
+    def __init__(
+            self, suit: str, rank: str, value: int, image_path: str) -> None:
         self.suit = suit
         self.rank = rank
         self.value = value
@@ -23,7 +24,7 @@ class Card():
 
 class Deck_Cards():
     """Класс колоды и действия с ней."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.colour = ["бубна", "черви", "крести", "пики"]
         self.deck = []
         self.table = []
@@ -46,7 +47,7 @@ class Deck_Cards():
             'туз': 14
         }
 
-    def create_deck(self):
+    def create_deck(self) -> None:
         """Создаёт колоду и перетосовывает колоду."""
         for suit in self.colour:
             for rank, value in self.card_ranks.items():
@@ -66,33 +67,30 @@ class Player():
     """Класс игрока и бота."""
     instances = []
 
-    def __init__(self):
+    def __init__(self) -> None:
         Player.instances.append(self)
         self.name = "Name"
         self.hands = []
 
     @classmethod
-    def get_all_instances(cls):
+    def get_all_instances(cls) -> list:
         """Получаем список игроков."""
         return cls.instances
 
     @classmethod
-    def get_instance_count(cls):
+    def get_instance_count(cls) -> int:
         """Считаем игроков."""
         return len(cls.instances)
 
-    def step(self, number_card, table, hands):
+    def step(self, number_card: int, table: list, hands: list) -> None:
         """Ход."""
         table.append(hands.pop(number_card))
 
-    def take_card(self, ):
-        """Забирает карты со стола, если не бьёт."""
-
-    def len_hands(self):
+    def len_hands(self) -> int:
         """Считает карты на руках"""
         return len(self.hands)
 
-    def add_cards(self):
+    def add_cards(self) -> None:
         """Добавляет карты в руки если они есть в колоде"""
         if self.len_hands() < NUMBER_OF_CARDS_DEALT and len(deck_cards) > 0:
             count = NUMBER_OF_CARDS_DEALT - self.len_hands()
@@ -109,7 +107,10 @@ class Player():
 
 class Leader(Deck_Cards):
     """Класс который описывает поведение ведущего."""
-    def hands_out_the_сards(self, deck, *args, **kwargs):
+    def __init__(self):
+        self.step = ''
+
+    def hands_out_the_сards(self, deck: list, *args, **kwargs) -> None:
         """Раздаёт карты, указывает козырь."""
         if count_player <= NUMBER_OF_CARDS_DEALT:
             for player in list_player:
@@ -118,7 +119,12 @@ class Leader(Deck_Cards):
                     hands.append(deck_cards.pop())
         trump_card.append(deck_cards.pop())
 
-    def one_step(self, player_1_hands, player_2_hands, trump_card):
+    def one_step(
+            self,
+            player_1_hands: list,
+            player_2_hands: list,
+            trump_card: list
+            ) -> str:
         """Определяет, кто первый ходит."""
         player1_trumps = []
         trump_suit = trump_card[0].suit
@@ -165,7 +171,7 @@ deck_player_2 = player_2.hands
 deck = Deck_Cards()
 deck_cards = deck.deck
 deck_finall = deck.create_deck()
-print(deck_cards[1].image_path)
+# print(deck_cards[1].image_path)
 # Создаём ведущего
 leader = Leader()
 # Считаем игроков
@@ -179,6 +185,6 @@ leader.hands_out_the_сards(deck_cards, count_player, list_player, trump_card)
 player_1_hands = player_1.hands
 player_2_hands = player_2.hands
 one_step = leader.one_step(player_1_hands, player_2_hands, trump_card)
-print(f'Первый ходит: {one_step}')
+# print(f'Первый ходит: {one_step}')
 played_cards = deck.table
 # player_1.step(1, played_cards, player_1_hands)

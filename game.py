@@ -13,7 +13,28 @@ WHITE = (255, 255, 255)
 GREEN = (0, 128, 0)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+PLAYER_HAND_ZONE = {
+        'x_start': 200,
+        'y': 400,
+        'card_width': 70,
+        'card_height': 100,
+        'spacing': 80
+    }
 
+PLAY_ZONE = {
+        'x_start': 200,
+        'y': 250,
+        'card_width': 70,
+        'card_height': 100,
+        'spacing': 80
+    }
+
+DISCARD_ZONE = {
+        'x': 690,
+        'y': 250,
+        'width': 70,
+        'height': 100
+    }
 
 font = pygame.font.Font(None, 12)
 
@@ -32,7 +53,8 @@ def draw_text(text: str,
               font_size: int = 24,
               font_name: str = None,
               bold=False,
-              italic=False):
+              italic=False
+              ) -> None:
     """
     Отрисовывает текст на экране.
     :param text: Текст для отрисовки
@@ -54,7 +76,10 @@ def draw_text(text: str,
     screen.blit(text_surface, (x, y))
 
 
-def draw_card(x, y, card, is_face_up=True):
+def draw_card(x: int,
+              y: int,
+              card,
+              is_face_up=True):
     """
     Отрисовывает карту как изображение.
     :param x: Координата X для отрисовки карты
@@ -72,7 +97,7 @@ def draw_card(x, y, card, is_face_up=True):
         screen.blit(card_back, (x, y))
 
 
-def draw_game_field():
+def draw_game_field() -> None:
     """Отрисовывает игровое поле."""
     screen.fill(GREEN)  # Зеленый фон для игрового поля
     # Отрисовываем имена
@@ -108,93 +133,64 @@ def draw_game_field():
 
 def handle_mouse_click(event, click_processed):
     """
-    Обрабатывает клик мыши.
+    Универсальный обработчик кликов мыши для всех игровых зон
     :param event: Событие мыши
-    :param click_processed: Флаг, указывающий, был ли клик уже обработан
-    :return: Обновлённое значение флага click_processed
+    :param click_processed: Флаг обработки клика
+    :param game_state: Состояние игры
+    :return: Обновлённый флаг click_processed
     """
+    # Обработка нажатия кнопки мыши
     if (event.type == pygame.MOUSEBUTTONDOWN
             and event.button == 1
             and not click_processed):
-        mouse_x, mouse_y = event.pos  # Координаты клика
+        mouse_x, mouse_y = event.pos
 
-        # Проверка, попал ли клик в зону карт игрока
+        # 1. Проверка клика по картам в руке игрока
         for i, card in enumerate(player_cards_1):
-            card_x = 200 + i * 80  # Координата X карты
-            card_y = 400  # Координата Y карты
+            card_x = PLAYER_HAND_ZONE['x_start'] + i * PLAYER_HAND_ZONE[
+                'spacing']
+            card_y = PLAYER_HAND_ZONE['y']
 
-            # Проверка, находится ли курсор в зоне карты
-            if (card_x <= mouse_x <= card_x + 70
-                    and card_y <= mouse_y <= card_y + 100):
+            if (card_x <= mouse_x <= card_x + PLAYER_HAND_ZONE['card_width']
+                    and card_y <= mouse_y <= card_y + PLAYER_HAND_ZONE[
+                        'card_height']):
                 print(f"Игрок выбрал карту: {card}")
-                # Добавляем карту в зону хода
                 played_cards.append(card)
-                # Удаляем карту из руки игрока
-                player_cards_1.pop(i)  # Удаляем только выбранную карту
-                click_processed = True  # Помечаем клик как обработанный
-                break  # Прерываем цикл после выбора карты
+                player_cards_1.pop(i)
+                click_processed = True
+                break
 
-    # Сбрасываем флаг при отпускании кнопки мыши
-    if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-        click_processed = False
+        # 2. Проверка клика по игровой зоне (взять карты)
+        if not click_processed and played_cards:
+            for i, card in enumerate(played_cards):
+                card_x = PLAY_ZONE['x_start'] + i * PLAY_ZONE['spacing']
+                card_y = PLAY_ZONE['y']
 
-    return click_processed
+                if (card_x <= mouse_x <= card_x + PLAY_ZONE['card_width']
+                        and card_y <= mouse_y <= card_y
+                        + PLAY_ZONE['card_height']):
+                    print("Игрок берёт карты")
+                    player_cards_1.extend(played_cards)
+                    played_cards.clear()
+                    click_processed = True
+                    break
 
-
-def maps_mouse_click(event, click_processed):
-    """Переносит карты из зоны игры в руки игрока"""
-    if (event.type == pygame.MOUSEBUTTONDOWN
-            and event.button == 1
-            and not click_processed):
-        mouse_x, mouse_y = event.pos
-        for i, card in enumerate(player_cards_1):
-            card_x = 200 + i * 80  # Координата X карты
-            card_y = 250  # Координата Y карты
-
-            # Проверка, находится ли курсор в зоне карты
-            if (card_x <= mouse_x <= card_x + 70
-                    and card_y <= mouse_y <= card_y + 100):
-                print(f"Игрок выбрал карту: {card}")
-                # Добавляем карту в зону хода
-                player_cards_1.extend(played_cards)
-                # Удаляем карту из руки игрока
+        # 3. Проверка клика по зоне отбоя (сброс карт)
+        if not click_processed:
+            if (DISCARD_ZONE['x'] <= mouse_x <= DISCARD_ZONE['x']
+                + DISCARD_ZONE['width'] and
+                DISCARD_ZONE['y'] <= mouse_y <= DISCARD_ZONE['y']
+                + DISCARD_ZONE['height']
+                ):
+                print("Карты отправлены в отбой")
+                discard_pile = deck.stand_down
+                discard_pile.extend(played_cards)
                 played_cards.clear()
-                click_processed = True  # Помечаем клик как обработанный
-                break  # Прерываем цикл после выбора карты
-
-    # Сбрасываем флаг при отпускании кнопки мыши
-    if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-        click_processed = False
-
-    return click_processed
-
-
-def stand_down_mouse_click(event, click_processed):
-    """Переносит карты из зоны игры в отбой"""
-    if (event.type == pygame.MOUSEBUTTONDOWN
-            and event.button == 1
-            and not click_processed):
-        mouse_x, mouse_y = event.pos
-        for i, card in enumerate(player_cards_1):
-            card_x = 690  # Координата X карты
-            card_y = 250  # Координата Y карты
-
-            # Проверка, находится ли курсор в зоне карты
-            if (card_x <= mouse_x <= card_x + 70 and
-                    card_y <= mouse_y <= card_y + 100):
-                print(f"Игрок выбрал карту: {card}")
-                # Добавляем карту в зону хода
-                stand_down = deck.stand_down
-                stand_down.extend(played_cards)
-                # Удаляем карту из руки игрока
-                played_cards.clear()
-                # Добавляем карты если менее 6
                 player_1.add_cards()
                 player_2.add_cards()
-                click_processed = True  # Помечаем клик как обработанный
-                break  # Прерываем цикл после выбора карты
+                click_processed = True
 
-    # Сбрасываем флаг при отпускании кнопки мыши
+    # Сброс флага при отпускании кнопки
     if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
         click_processed = False
 
@@ -213,10 +209,8 @@ def main():
                 sys.exit()
         # Обработка клика мыши
             click_processed = handle_mouse_click(event, click_processed)
-            maps_mouse_click(event, click_processed)
         # Отрисовка игрового поля
         draw_game_field()
-        stand_down_mouse_click(event, click_processed)
         # Обновление экрана
         pygame.display.flip()
 
