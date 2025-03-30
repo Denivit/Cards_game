@@ -120,11 +120,11 @@ def draw_game_field() -> None:
     # Отрисовка атаки
     if deck.attack:  # Если в зоне хода есть карты
         for i, card in enumerate(deck.attack):
-            draw_card(200 + i * 80, 250, card, is_face_up=True)
+            draw_card(205 + i * 80, 220, card, is_face_up=True)
     # Отрисовка защиты
     if deck.defense:  # Если в зоне хода есть карты
         for i, card in enumerate(deck.defense):
-            draw_card(205 + i * 80, 220, card, is_face_up=True)
+            draw_card(200 + i * 80, 250, card, is_face_up=True)
 
     # Отрисовка карт игрока
     for i, card in enumerate(player_cards_1):
@@ -191,14 +191,17 @@ def handle_mouse_click(event, click_processed):
                 DISCARD_ZONE['y'] <= mouse_y <= DISCARD_ZONE['y']
                 + DISCARD_ZONE['height']
                 ):
-                print("Карты отправлены в отбой")
-                discard_pile = deck.stand_down
-                discard_pile.extend(deck.attack + deck.defense)
-                deck.attack.clear()
-                deck.defense.clear()
-                player_1.add_cards()
-                player_2.add_cards()
-                click_processed = True
+                if player_1.status is True:
+                    print("Карты отправлены в отбой")
+                    discard_pile = deck.stand_down
+                    discard_pile.extend(deck.attack + deck.defense)
+                    deck.attack.clear()
+                    deck.defense.clear()
+                    player_1.add_cards()
+                    player_2.add_cards()
+                    click_processed = True
+                else:
+                    print('Закончить ход может только атакующий')
 
     # Сброс флага при отпускании кнопки
     if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
