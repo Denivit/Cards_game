@@ -3,7 +3,7 @@ import sys
 import pygame
 
 from cards_game import deck, deck_cards, player_1, player_2, trump_card
-from logic import atack_step_logic, defense_step
+from logic import atack_step_logic, defense_step, select_card_to_play
 
 
 pygame.init()
@@ -158,7 +158,7 @@ def handle_mouse_click(event, click_processed):
             if (card_x <= mouse_x <= card_x + PLAYER_HAND_ZONE['card_width']
                     and card_y <= mouse_y <= card_y + PLAYER_HAND_ZONE[
                         'card_height']):
-                print(f"Игрок выбрал карту: {card} под номером {i} ранг {card.value}")
+                print(f"Игрок выбрал карту: {card}")
                 # Если атакующий ходит
                 if player_1.status is True:
                     if atack_step_logic(card) is True or not deck.attack:
@@ -196,6 +196,8 @@ def handle_mouse_click(event, click_processed):
                         player_cards_1.extend(deck.attack + deck.defense)
                         deck.attack.clear()
                         deck.defense.clear()
+                        player_1.add_cards()
+                        player_2.add_cards()
                         click_processed = True
                         break
                     else:
@@ -204,10 +206,10 @@ def handle_mouse_click(event, click_processed):
         # 3. Проверка клика по зоне отбоя (сброс карт)
         if not click_processed:
             if (DISCARD_ZONE['x'] <= mouse_x <= DISCARD_ZONE['x']
-                + DISCARD_ZONE['width'] and
-                DISCARD_ZONE['y'] <= mouse_y <= DISCARD_ZONE['y']
-                + DISCARD_ZONE['height']
-                ):
+                    + DISCARD_ZONE['width']
+                    and
+                    DISCARD_ZONE['y'] <= mouse_y <= DISCARD_ZONE['y']
+                    + DISCARD_ZONE['height']):
                 if deck.attack == []:
                     print('Нет карт для отбоя')
                 else:
@@ -241,12 +243,21 @@ def main():
                 pygame.quit()
                 sys.exit()
         # Обработка клика мыши
-            click_processed = handle_mouse_click(event, click_processed)
+        click_processed = handle_mouse_click(event, click_processed)
+        # Ход бота
+        if (player_2.status is True
+                and len(deck.attack) == len(deck.defense)):
+            trump_suit = trump_card[0].suit
+            step_bot = select_card_to_play(player_cards_2, trump_suit)
+            print(f'Бот пойдёт картой {step_bot}')
+            deck.attack.append(step_bot)
+            player_cards_2.remove(step_bot)
+
+
         # Отрисовка игрового поля
         draw_game_field()
         # Обновление экрана
         pygame.display.flip()
-
         # Ограничение FPS
         clock.tick(30)
 

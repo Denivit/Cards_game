@@ -45,7 +45,9 @@ def select_card_to_play(player_hand, trump_suit, is_all_trump_cards=False):
 
 
 def atack_step_logic(card) -> bool:
-    """Разрешает  при атаке ходить только тем рангом который уже есть на столе"""
+    """Разрешает  при атаке ходить только тем рангом который уже есть на
+    столе.
+    """
     range = card.rank
     only_deck = deck.attack + deck.defense
     for cart in only_deck:
@@ -55,21 +57,21 @@ def atack_step_logic(card) -> bool:
 
 
 def defense_step(card) -> bool:
+    """Предусмотрена игра картами выше по рангу если одной масти, в так же
+    предусматривает защиту козырями.
+    """
     value_defense_cart = card.value
-    suit__defense_cart = card.suit
+    suit_defense_cart = card.suit
     atack_cart = deck.attack[-1]
     value_atack_cart = atack_cart.value
     suit_atack_cart = atack_cart.suit
 
-    if (suit_atack_cart == suit__defense_cart
+    if (suit_atack_cart == suit_defense_cart
             and value_defense_cart > value_atack_cart):
         return True
-    if (suit_atack_cart != trump_card.suit
-            and suit__defense_cart == trump_card.suit):
+    if (suit_atack_cart != trump_card[0].suit
+            and suit_defense_cart == trump_card[0].suit):
         return True
-
-
-
 
 
 player_hand = player_2.hands
