@@ -44,14 +44,32 @@ def select_card_to_play(player_hand, trump_suit, is_all_trump_cards=False):
     return candidate_cards[0] if candidate_cards else None
 
 
-def step_logic(card):
-    """"""
+def atack_step_logic(card) -> bool:
+    """Разрешает  при атаке ходить только тем рангом который уже есть на столе"""
     range = card.rank
     only_deck = deck.attack + deck.defense
     for cart in only_deck:
         range_cart = cart.rank
         if range == range_cart:
             return True
+
+
+def defense_step(card) -> bool:
+    value_defense_cart = card.value
+    suit__defense_cart = card.suit
+    atack_cart = deck.attack[-1]
+    value_atack_cart = atack_cart.value
+    suit_atack_cart = atack_cart.suit
+
+    if (suit_atack_cart == suit__defense_cart
+            and value_defense_cart > value_atack_cart):
+        return True
+    if (suit_atack_cart != trump_card.suit
+            and suit__defense_cart == trump_card.suit):
+        return True
+
+
+
 
 
 player_hand = player_2.hands

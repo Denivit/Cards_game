@@ -3,7 +3,7 @@ import sys
 import pygame
 
 from cards_game import deck, deck_cards, player_1, player_2, trump_card
-from logic import step_logic
+from logic import atack_step_logic, defense_step
 
 
 pygame.init()
@@ -158,10 +158,10 @@ def handle_mouse_click(event, click_processed):
             if (card_x <= mouse_x <= card_x + PLAYER_HAND_ZONE['card_width']
                     and card_y <= mouse_y <= card_y + PLAYER_HAND_ZONE[
                         'card_height']):
-                print(f"Игрок выбрал карту: {card} под номером {i} ранг {card.rank}")
+                print(f"Игрок выбрал карту: {card} под номером {i} ранг {card.value}")
                 # Если атакующий ходит
                 if player_1.status is True:
-                    if step_logic(card) is True or not deck.attack:
+                    if atack_step_logic(card) is True or not deck.attack:
                         deck.attack.append(card)
                         player_cards_1.pop(i)
                         click_processed = True
@@ -173,10 +173,13 @@ def handle_mouse_click(event, click_processed):
                     if not deck.attack:
                         print('Ждём хода противника')
                     else:
-                        deck.defense.append(card)
-                        player_cards_1.pop(i)
-                        click_processed = True
-                        break
+                        if defense_step(card) is True:
+                            deck.defense.append(card)
+                            player_cards_1.pop(i)
+                            click_processed = True
+                            break
+                        else:
+                            print('Нельзя этой картой отбивать атаку')
 
         # 2. Проверка клика по игровой зоне (взять карты)
         if not click_processed and (deck.attack or deck.defense):
