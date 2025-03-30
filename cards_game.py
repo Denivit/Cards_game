@@ -29,7 +29,6 @@ class Deck_Cards():
         self.deck = []
         self.defense = []
         self.attack = []
-        self.table = []
         self.trump_card = []
         self.stand_down = []
         self.count = COUNT_CARD
@@ -85,10 +84,6 @@ class Player():
         """Считаем игроков."""
         return len(cls.instances)
 
-    def step(self, number_card: int, table: list, hands: list) -> None:
-        """Ход."""
-        table.append(hands.pop(number_card))
-
     def len_hands(self) -> int:
         """Считает карты на руках"""
         return len(self.hands)
@@ -127,7 +122,7 @@ class Leader(Deck_Cards):
             player_1_hands: list,
             player_2_hands: list,
             trump_card: list
-            ) -> str:
+            ) -> None:
         """Определяет, кто первый ходит."""
         trump_suit = trump_card[0].suit
         player1_trumps = []
@@ -212,5 +207,3 @@ player_1_hands = player_1.hands
 player_2_hands = player_2.hands
 one_step = leader.one_step(player_1_hands, player_2_hands, trump_card)
 print(f'Первый ходит: {player_2.status}')
-played_cards = deck.table
-# player_1.step(1, played_cards, player_1_hands)

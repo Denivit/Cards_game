@@ -2,8 +2,8 @@ import sys
 
 import pygame
 
-from cards_game import (deck, deck_cards, played_cards, player_1, player_2,
-                        trump_card)
+from cards_game import (deck, deck_cards, player_1,
+                        player_2, trump_card)
 
 pygame.init()
 WIDTH, HEIGHT = 800, 600
@@ -117,10 +117,14 @@ def draw_game_field() -> None:
     if True:  # Если в отбое есть карты
         screen.blit(card_back, (690, 250))
 
-    # Отрисовка зоны для хода (сыгранные карты)
-    if played_cards:  # Если в зоне хода есть карты
-        for i, card in enumerate(played_cards):
+    # Отрисовка атаки
+    if deck.attack:  # Если в зоне хода есть карты
+        for i, card in enumerate(deck.attack):
             draw_card(200 + i * 80, 250, card, is_face_up=True)
+    # Отрисовка защиты
+    if deck.defense:  # Если в зоне хода есть карты
+        for i, card in enumerate(deck.defense):
+            draw_card(205 + i * 80, 220, card, is_face_up=True)
 
     # Отрисовка карт игрока
     for i, card in enumerate(player_cards_1):
@@ -155,14 +159,18 @@ def handle_mouse_click(event, click_processed):
                     and card_y <= mouse_y <= card_y + PLAYER_HAND_ZONE[
                         'card_height']):
                 print(f"Игрок выбрал карту: {card}")
-                played_cards.append(card)
+                if player_1.status is True:
+                    deck.attack.append(card)
+                else:
+                    deck.defense.append(card)
                 player_cards_1.pop(i)
                 click_processed = True
                 break
 
         # 2. Проверка клика по игровой зоне (взять карты)
-        if not click_processed and played_cards:
-            for i, card in enumerate(played_cards):
+        if not click_processed and (deck.attack or deck.defense):
+            mouse_x, mouse_y = event.pos
+            for i in range(max(len(deck.attack), len(deck.defense))):
                 card_x = PLAY_ZONE['x_start'] + i * PLAY_ZONE['spacing']
                 card_y = PLAY_ZONE['y']
 
@@ -170,8 +178,9 @@ def handle_mouse_click(event, click_processed):
                         and card_y <= mouse_y <= card_y
                         + PLAY_ZONE['card_height']):
                     print("Игрок берёт карты")
-                    player_cards_1.extend(played_cards)
-                    played_cards.clear()
+                    player_cards_1.extend(deck.attack + deck.defense)
+                    deck.attack.clear()
+                    deck.defense.clear()
                     click_processed = True
                     break
 
@@ -184,8 +193,9 @@ def handle_mouse_click(event, click_processed):
                 ):
                 print("Карты отправлены в отбой")
                 discard_pile = deck.stand_down
-                discard_pile.extend(played_cards)
-                played_cards.clear()
+                discard_pile.extend(deck.attack + deck.defense)
+                deck.attack.clear()
+                deck.defense.clear()
                 player_1.add_cards()
                 player_2.add_cards()
                 click_processed = True
