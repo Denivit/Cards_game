@@ -27,6 +27,8 @@ class Deck_Cards():
     def __init__(self) -> None:
         self.colour = ["бубна", "черви", "крести", "пики"]
         self.deck = []
+        self.defense = []
+        self.attack = []
         self.table = []
         self.trump_card = []
         self.stand_down = []
@@ -70,6 +72,7 @@ class Player():
     def __init__(self) -> None:
         Player.instances.append(self)
         self.name = "Name"
+        self.status = None
         self.hands = []
 
     @classmethod
@@ -126,38 +129,61 @@ class Leader(Deck_Cards):
             trump_card: list
             ) -> str:
         """Определяет, кто первый ходит."""
-        player1_trumps = []
         trump_suit = trump_card[0].suit
+        player1_trumps = []
+        player2_trumps = []
+
+    # Собираем козырные карты первого игрока
         for card in player_1_hands:
             if card.suit == trump_suit:
                 player1_trumps.append(card)
 
-        player2_trumps = []
+    # Собираем козырные карты второго игрока
         for card in player_2_hands:
             if card.suit == trump_suit:
                 player2_trumps.append(card)
 
-        if not player1_trumps and not player2_trumps:
-            return random.choice([player_1.name, player_2.name])
-        elif not player1_trumps:
-            return player_2.name
-        elif not player2_trumps:
-            return player_1.name
+        # Случай, когда у обоих нет козырей
+        if len(player1_trumps) == 0 and len(player2_trumps) == 0:
+            if random.randint(0, 1) == 0:
+                player_1.status = True
+                player_2.status = False
+            else:
+                player_1.status = False
+                player_2.status = True
+            return
 
-        smallest_trump_player1 = player1_trumps[0]
+        # Если у первого игрока нет козырей
+        if len(player1_trumps) == 0:
+            player_1.status = False
+            player_2.status = True
+            return
+
+        # Если у второго игрока нет козырей
+        if len(player2_trumps) == 0:
+            player_1.status = True
+            player_2.status = False
+            return
+
+        # Находим младший козырь у первого игрока
+        min_trump_p1 = player1_trumps[0]
         for card in player1_trumps:
-            if card.value < smallest_trump_player1.value:
-                smallest_trump_player1 = card
+            if card.value < min_trump_p1.value:
+                min_trump_p1 = card
 
-        smallest_trump_player2 = player2_trumps[0]
+        # Находим младший козырь у второго игрока
+        min_trump_p2 = player2_trumps[0]
         for card in player2_trumps:
-            if card.value < smallest_trump_player2.value:
-                smallest_trump_player2 = card
+            if card.value < min_trump_p2.value:
+                min_trump_p2 = card
 
-        if smallest_trump_player1.value < smallest_trump_player2.value:
-            return player_1.name
+        # Сравниваем младшие козыри
+        if min_trump_p1.value < min_trump_p2.value:
+            player_1.status = True
+            player_2.status = False
         else:
-            return player_2.name
+            player_1.status = False
+            player_2.status = True
 
 
 player_1 = Player()   # Игрок 1
@@ -185,6 +211,6 @@ leader.hands_out_the_сards(deck_cards, count_player, list_player, trump_card)
 player_1_hands = player_1.hands
 player_2_hands = player_2.hands
 one_step = leader.one_step(player_1_hands, player_2_hands, trump_card)
-# print(f'Первый ходит: {one_step}')
+print(f'Первый ходит: {player_2.status}')
 played_cards = deck.table
 # player_1.step(1, played_cards, player_1_hands)
