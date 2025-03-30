@@ -2,8 +2,9 @@ import sys
 
 import pygame
 
-from cards_game import (deck, deck_cards, player_1,
-                        player_2, trump_card)
+from cards_game import deck, deck_cards, player_1, player_2, trump_card
+from logic import step_logic
+
 
 pygame.init()
 WIDTH, HEIGHT = 800, 600
@@ -154,18 +155,28 @@ def handle_mouse_click(event, click_processed):
             card_x = PLAYER_HAND_ZONE['x_start'] + i * PLAYER_HAND_ZONE[
                 'spacing']
             card_y = PLAYER_HAND_ZONE['y']
-
             if (card_x <= mouse_x <= card_x + PLAYER_HAND_ZONE['card_width']
                     and card_y <= mouse_y <= card_y + PLAYER_HAND_ZONE[
                         'card_height']):
-                print(f"Игрок выбрал карту: {card}")
+                print(f"Игрок выбрал карту: {card} под номером {i} ранг {card.rank}")
+                # Если атакующий ходит
                 if player_1.status is True:
-                    deck.attack.append(card)
+                    if step_logic(card) is True or not deck.attack:
+                        deck.attack.append(card)
+                        player_cards_1.pop(i)
+                        click_processed = True
+                        break
+                    else:
+                        print('Нет такой карты в колоде')
                 else:
-                    deck.defense.append(card)
-                player_cards_1.pop(i)
-                click_processed = True
-                break
+                    # Если защищающий ходит
+                    if not deck.attack:
+                        print('Ждём хода противника')
+                    else:
+                        deck.defense.append(card)
+                        player_cards_1.pop(i)
+                        click_processed = True
+                        break
 
         # 2. Проверка клика по игровой зоне (взять карты)
         if not click_processed and (deck.attack or deck.defense):
@@ -177,12 +188,15 @@ def handle_mouse_click(event, click_processed):
                 if (card_x <= mouse_x <= card_x + PLAY_ZONE['card_width']
                         and card_y <= mouse_y <= card_y
                         + PLAY_ZONE['card_height']):
-                    print("Игрок берёт карты")
-                    player_cards_1.extend(deck.attack + deck.defense)
-                    deck.attack.clear()
-                    deck.defense.clear()
-                    click_processed = True
-                    break
+                    if player_1.status is False:
+                        print("Игрок берёт карты")
+                        player_cards_1.extend(deck.attack + deck.defense)
+                        deck.attack.clear()
+                        deck.defense.clear()
+                        click_processed = True
+                        break
+                    else:
+                        print('Атакующий не может снимать каты с поля атаки')
 
         # 3. Проверка клика по зоне отбоя (сброс карт)
         if not click_processed:
@@ -191,17 +205,20 @@ def handle_mouse_click(event, click_processed):
                 DISCARD_ZONE['y'] <= mouse_y <= DISCARD_ZONE['y']
                 + DISCARD_ZONE['height']
                 ):
-                if player_1.status is True:
-                    print("Карты отправлены в отбой")
-                    discard_pile = deck.stand_down
-                    discard_pile.extend(deck.attack + deck.defense)
-                    deck.attack.clear()
-                    deck.defense.clear()
-                    player_1.add_cards()
-                    player_2.add_cards()
-                    click_processed = True
+                if deck.attack == []:
+                    print('Нет карт для отбоя')
                 else:
-                    print('Закончить ход может только атакующий')
+                    if player_1.status is True:
+                        print("Карты отправлены в отбой")
+                        discard_pile = deck.stand_down
+                        discard_pile.extend(deck.attack + deck.defense)
+                        deck.attack.clear()
+                        deck.defense.clear()
+                        player_1.add_cards()
+                        player_2.add_cards()
+                        click_processed = True
+                    else:
+                        print('Закончить ход может только атакующий')
 
     # Сброс флага при отпускании кнопки
     if event.type == pygame.MOUSEBUTTONUP and event.button == 1:

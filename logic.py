@@ -1,4 +1,4 @@
-from cards_game import player_2, trump_card
+from cards_game import player_2, trump_card, deck
 
 
 def select_card_to_play(player_hand, trump_suit, is_all_trump_cards=False):
@@ -42,6 +42,16 @@ def select_card_to_play(player_hand, trump_suit, is_all_trump_cards=False):
 
     # Возвращаем самую младшую карту
     return candidate_cards[0] if candidate_cards else None
+
+
+def step_logic(card):
+    """"""
+    range = card.rank
+    only_deck = deck.attack + deck.defense
+    for cart in only_deck:
+        range_cart = cart.rank
+        if range == range_cart:
+            return True
 
 
 player_hand = player_2.hands
