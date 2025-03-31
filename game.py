@@ -3,8 +3,8 @@ import sys
 import pygame
 
 from cards_game import deck, deck_cards, player_1, player_2, trump_card
-from logic import atack_step_logic, defense_step, select_card_to_play
-
+from logic import (atack_step_logic, bot_atack_step_logic, defense_step,
+                   select_card_to_play)
 
 pygame.init()
 WIDTH, HEIGHT = 800, 600
@@ -246,14 +246,31 @@ def main():
         click_processed = handle_mouse_click(event, click_processed)
         # Ход бота
         if (player_2.status is True
-                and len(deck.attack) == len(deck.defense)):
+                and len(deck.attack) == len(deck.defense)
+                and len(deck.attack) < 1):
             trump_suit = trump_card[0].suit
             step_bot = select_card_to_play(player_cards_2, trump_suit)
             print(f'Бот пойдёт картой {step_bot}')
             deck.attack.append(step_bot)
             player_cards_2.remove(step_bot)
-
-
+        elif (player_2.status is True
+                and len(deck.attack) == len(deck.defense)
+                and len(deck.attack) > 0):
+            step_bot = bot_atack_step_logic()
+            if step_bot != None:
+                print(f'Бот подкидывает карту {step_bot}')
+                deck.attack.append(step_bot)
+                player_cards_2.remove(step_bot)
+            else:
+                print("Карты отправлены в отбой")
+                discard_pile = deck.stand_down
+                discard_pile.extend(deck.attack + deck.defense)
+                deck.attack.clear()
+                deck.defense.clear()
+                player_1.add_cards()
+                player_2.add_cards()
+                player_2.status = False
+                player_1.status = True
         # Отрисовка игрового поля
         draw_game_field()
         # Обновление экрана

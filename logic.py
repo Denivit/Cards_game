@@ -44,6 +44,15 @@ def select_card_to_play(player_hand, trump_suit, is_all_trump_cards=False):
     return candidate_cards[0] if candidate_cards else None
 
 
+def bot_atack_step_logic():
+    """Выбирает карту чтобы подкинуть или делает отбой."""
+    only_deck = deck.attack + deck.defense
+    for cart in player_2.hands:
+        for cart_table in only_deck:
+            if cart.rank == cart_table.rank:
+                return cart
+
+
 def atack_step_logic(card) -> bool:
     """Разрешает  при атаке ходить только тем рангом который уже есть на
     столе.
