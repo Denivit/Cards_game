@@ -45,12 +45,28 @@ def select_card_to_play(player_hand, trump_suit, is_all_trump_cards=False):
 
 
 def bot_atack_step_logic():
-    """Выбирает карту чтобы подкинуть или делает отбой."""
+    """Выбирает карту чтобы подкинуть  у бота."""
     only_deck = deck.attack + deck.defense
     for cart in player_2.hands:
         for cart_table in only_deck:
             if cart.rank == cart_table.rank:
                 return cart
+
+
+def defanse_bot():
+    """Выбирает карту для защиты."""
+    if not deck.attack:
+        return None  # Нет карт для отбития
+    last_card = deck.attack[-1]
+    candidate_cards = [
+        card for card in player_2.hands 
+        if (card.suit == last_card.suit and card.value > last_card.value) 
+        or (card.suit == trump_card[0].suit and last_card.suit != trump_card[0].suit)
+    ]
+    if candidate_cards:
+        # Возвращаем самую младшую подходящую карту
+        return min(candidate_cards, key=lambda x: x.value)
+    return None
 
 
 def atack_step_logic(card) -> bool:

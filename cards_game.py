@@ -33,10 +33,10 @@ class Deck_Cards():
         self.stand_down = []
         self.count = COUNT_CARD
         self.card_ranks = {
-            '2': 2,
-            '3': 3,
-            '4': 4,
-            '5': 5,
+            #'2': 2,
+            #'3': 3,
+            #'4': 4,
+            #'5': 5,
             '6': 6,
             '7': 7,
             '8': 8,
@@ -60,7 +60,7 @@ class Deck_Cards():
                     value=value,
                     image_path=image_path
                 )
-                deck_cards.append(card)
+                self.deck.append(card)
         random.shuffle(self.deck)
 
 

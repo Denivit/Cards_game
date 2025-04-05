@@ -4,7 +4,7 @@ import pygame
 
 from cards_game import deck, deck_cards, player_1, player_2, trump_card
 from logic import (atack_step_logic, bot_atack_step_logic, defense_step,
-                   select_card_to_play)
+                   select_card_to_play, defanse_bot)
 
 pygame.init()
 WIDTH, HEIGHT = 800, 600
@@ -19,7 +19,7 @@ PLAYER_HAND_ZONE = {
         'y': 400,
         'card_width': 70,
         'card_height': 100,
-        'spacing': 80
+        'spacing': 80,
     }
 
 PLAY_ZONE = {
@@ -221,6 +221,8 @@ def handle_mouse_click(event, click_processed):
                         deck.defense.clear()
                         player_1.add_cards()
                         player_2.add_cards()
+                        player_1.status = False
+                        player_2.status = True
                         click_processed = True
                     else:
                         print('Закончить ход может только атакующий')
@@ -244,7 +246,21 @@ def main():
                 sys.exit()
         # Обработка клика мыши
         click_processed = handle_mouse_click(event, click_processed)
-        # Ход бота
+        # Ход бота если защищается
+        if player_2.status is False and len(deck.attack) != len(deck.defense):
+            defence_cart = defanse_bot()
+            print(f'До {defence_cart}')
+            if defence_cart is None:
+                print('Забираю, нечем бить!')
+                player_cards_2.extend(deck.defense + deck.attack)
+                deck.attack.clear()
+                deck.defense.clear()
+                player_1.add_cards()
+            else:
+                deck.defense.append(defence_cart)
+                player_cards_2.remove(defence_cart)
+
+        # Ход бота если атакует
         if (player_2.status is True
                 and len(deck.attack) == len(deck.defense)
                 and len(deck.attack) < 1):
