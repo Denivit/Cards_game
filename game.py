@@ -19,7 +19,7 @@ PLAYER_HAND_ZONE = {
         'y': 400,
         'card_width': 70,
         'card_height': 100,
-        'spacing': 80,
+        'spacing': 70,
     }
 
 PLAY_ZONE = {
@@ -129,11 +129,42 @@ def draw_game_field() -> None:
 
     # Отрисовка карт игрока
     for i, card in enumerate(player_cards_1):
-        draw_card(200 + i * 80, 400, card, is_face_up=True)
+        if len(player_cards_1) == 7:
+            PLAYER_HAND_ZONE['spacing'] = 60
+            draw_card(200 + i * PLAYER_HAND_ZONE['spacing'],
+                      400,
+                      card,
+                      is_face_up=True)
+        if len(player_cards_1) == 8:
+            PLAYER_HAND_ZONE['spacing'] = 50
+            draw_card(200 + i * PLAYER_HAND_ZONE['spacing'],
+                      400,
+                      card,
+                      is_face_up=True)
+        if len(player_cards_1) == 8:
+            PLAYER_HAND_ZONE['spacing'] = 50
+            draw_card(200 + i * PLAYER_HAND_ZONE['spacing'],
+                      400,
+                      card,
+                      is_face_up=True)
+        if len(player_cards_1) == 9:
+            PLAYER_HAND_ZONE['spacing'] = 40
+            draw_card(200 + i * PLAYER_HAND_ZONE['spacing'],
+                      400,
+                      card,
+                      is_face_up=True)
+        else:
+            draw_card(200 + i * PLAYER_HAND_ZONE['spacing'],
+                      400,
+                      card,
+                      is_face_up=True)
 
     # Отрисовка карт противника
     for i, card in enumerate(player_cards_2):
-        draw_card(200 + i * 80, 50, card, is_face_up=False)
+        draw_card(200 + i * PLAYER_HAND_ZONE['spacing'],
+                  50,
+                  card,
+                  is_face_up=False)
 
 
 def handle_mouse_click(event, click_processed):
@@ -152,12 +183,15 @@ def handle_mouse_click(event, click_processed):
 
         # 1. Проверка клика по картам в руке игрока
         for i, card in enumerate(player_cards_1):
-            card_x = PLAYER_HAND_ZONE['x_start'] + i * PLAYER_HAND_ZONE[
-                'spacing']
+            card_x = PLAYER_HAND_ZONE['x_start'] + i * PLAYER_HAND_ZONE['spacing']
             card_y = PLAYER_HAND_ZONE['y']
-            if (card_x <= mouse_x <= card_x + PLAYER_HAND_ZONE['card_width']
-                    and card_y <= mouse_y <= card_y + PLAYER_HAND_ZONE[
-                        'card_height']):
+            if i < len(player_cards_1) - 1:
+                clickable_width = PLAYER_HAND_ZONE['spacing']  # Видимая часть
+            else:
+                clickable_width = PLAYER_HAND_ZONE['card_width']  # Полная ширина
+                # Проверяем попадание курсора в область
+            if (card_x <= mouse_x <= card_x + clickable_width and 
+                card_y <= mouse_y <= card_y + PLAYER_HAND_ZONE['card_height']):
                 print(f"Игрок выбрал карту: {card}")
                 # Если атакующий ходит
                 if player_1.status is True:
